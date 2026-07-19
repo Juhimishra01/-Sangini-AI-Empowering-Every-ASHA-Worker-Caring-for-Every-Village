@@ -1,4 +1,6 @@
 // @ts-nocheck
+import { useAuth } from "./context/AuthContext";
+import Login from "./pages/Login";
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Heart,
@@ -1610,11 +1612,11 @@ function NotificationsPanel({ onClose }) {
 /* ---------------------------------- ROOT APP --------------------------------- */
 
 export default function SanginiAI() {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [tab, setTab] = useState('home');
+  const { isLoggedIn } = useAuth();
+  const [tab, setTab] = useState("home");
   const [showNotif, setShowNotif] = useState(false);
 
-  if (!loggedIn) return <LoginScreen onLogin={() => setLoggedIn(true)} />;
+  if (!isLoggedIn) return <Login />;
 
   const titles = {
     home: null,
@@ -1629,7 +1631,7 @@ export default function SanginiAI() {
     <div className="min-h-screen bg-slate-50 max-w-md mx-auto relative font-sans">
       <TopBar
         onNotif={() => setShowNotif(true)}
-        onLogout={() => setLoggedIn(false)}
+        onLogout={() => import("./services/authService").then(m => m.logoutUser())}
         unread={notificationsData.filter((n) => n.urgent).length}
       />
 

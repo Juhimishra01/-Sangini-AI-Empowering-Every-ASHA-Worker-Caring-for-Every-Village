@@ -7,8 +7,11 @@ import {
 } from "firebase/auth";
 import { auth } from "./firebase";
 
-// Set up invisible reCAPTCHA
 export const setupRecaptcha = (containerId: string) => {
+  if (window.recaptchaVerifier) {
+    window.recaptchaVerifier.clear();
+    window.recaptchaVerifier = null;
+  }
   window.recaptchaVerifier = new RecaptchaVerifier(
     auth,
     containerId,
