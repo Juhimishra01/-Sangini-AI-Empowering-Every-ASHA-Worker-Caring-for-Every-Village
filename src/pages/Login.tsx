@@ -1,50 +1,31 @@
 // @ts-nocheck
-import React, { useState, useEffect } from "react";
-import { Heart, Phone, ChevronRight, Loader2, ShieldCheck } from "lucide-react";
-import { setupRecaptcha, sendOTP, verifyOTP } from "../services/authService";
+import React, { useState } from "react";
+import { Heart, Mail, Lock, ChevronRight, Loader2, ShieldCheck } from "lucide-react";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../services/firebase";
 
 export default function Login() {
-  const [step, setStep] = useState(0);
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-  return () => {
-    if (window.recaptchaVerifier) {
-      window.recaptchaVerifier.clear();
-      window.recaptchaVerifier = null;
-    }
-  };
-}, []);
-
-  const handleSendOTP = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (phone.length < 10) return;
     setLoading(true);
     setError("");
     try {
-      setupRecaptcha("recaptcha-container");
-      await sendOTP("+91" + phone);
-      setStep(1);
+      await signInWithEmailAndPassword(auth, email, password);
     } catch (err) {
-      setError("Failed to send OTP. Check your phone number and try again.");
-      console.error(err);
-    }
-    setLoading(false);
-  };
-
-  const handleVerifyOTP = async (e) => {
-    e.preventDefault();
-    if (otp.length < 6) return;
-    setLoading(true);
-    setError("");
-    try {
-      await verifyOTP(otp);
-    } catch (err) {
-      setError("Invalid OTP. Please try again.");
-      console.error(err);
+      if (err.code === "auth/user-not-found" || err.code === "auth/invalid-credential" || err.code === "auth/invalid-email")  {
+        try {
+          await createUserWithEmailAndPassword(auth, email, password);
+        } catch (err2) {
+          setError(err2.message);
+        }
+      } else {
+        setError(err2.message);
+      }
     }
     setLoading(false);
   };
@@ -62,77 +43,48 @@ export default function Login() {
       </div>
 
       <div className="mx-5 mb-8 bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
-        {step === 0 ? (
-          <form onSubmit={handleSendOTP} className="space-y-4">
-            <div>
-              <label className="text-sm font-semibold text-slate-700">
-                ASHA Worker Login
-              </label>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Enter your registered mobile number
-              </p>
-            </div>
-            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5">
-              <Phone size={18} className="text-slate-400" />
-              <span className="text-slate-500 text-sm">+91</span>
-              <input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                placeholder="98765 43210"
-                className="flex-1 bg-transparent outline-none text-slate-800 text-sm"
-              />
-            </div>
-            {error && <p className="text-xs text-rose-500">{error}</p>}
-            <div id="recaptcha-container"></div>
-            <button
-              type="submit"
-              disabled={phone.length < 10 || loading}
-              className="w-full bg-gradient-to-r from-teal-600 to-blue-600 text-white font-semibold rounded-2xl py-3.5 flex items-center justify-center gap-2 disabled:opacity-40"
-            >
-              {loading ? (
-                <Loader2 size={18} className="animate-spin" />
-              ) : (
-                <>Send OTP <ChevronRight size={16} /></>
-              )}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleVerifyOTP} className="space-y-4">
-            <div>
-              <label className="text-sm font-semibold text-slate-700">
-                Enter OTP
-              </label>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Sent to +91 {phone}
-              </p>
-            </div>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <label className="text-sm font-semibold text-slate-700">
+              ASHA Worker Login
+            </label>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Enter your email and password
+            </p>
+          </div>
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5">
+            <Mail size={18} className="text-slate-400" />
             <input
-              value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-              placeholder="• • • • • •"
-              className="w-full text-center text-2xl tracking-widest bg-slate-50 border border-slate-200 rounded-2xl py-3.5 outline-none"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="asha@example.com"
+              type="email"
+              className="flex-1 bg-transparent outline-none text-slate-800 text-sm"
             />
-            {error && <p className="text-xs text-rose-500">{error}</p>}
-            <button
-              type="submit"
-              disabled={otp.length < 6 || loading}
-              className="w-full bg-gradient-to-r from-teal-600 to-blue-600 text-white font-semibold rounded-2xl py-3.5 flex items-center justify-center gap-2 disabled:opacity-40"
-            >
-              {loading ? (
-                <Loader2 size={18} className="animate-spin" />
-              ) : (
-                <>Verify OTP <ChevronRight size={16} /></>
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={() => { setStep(0); setError(""); }}
-              className="w-full text-center text-xs text-slate-400 font-medium"
-            >
-              Change number
-            </button>
-          </form>
-        )}
+          </div>
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5">
+            <Lock size={18} className="text-slate-400" />
+            <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              type="password"
+              className="flex-1 bg-transparent outline-none text-slate-800 text-sm"
+            />
+          </div>
+          {error && <p className="text-xs text-rose-500">{error}</p>}
+          <button
+            type="submit"
+            disabled={!email || !password || loading}
+            className="w-full bg-gradient-to-r from-teal-600 to-blue-600 text-white font-semibold rounded-2xl py-3.5 flex items-center justify-center gap-2 disabled:opacity-40"
+          >
+            {loading ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <>Login <ChevronRight size={16} /></>
+            )}
+          </button>
+        </form>
       </div>
 
       <div className="flex items-center justify-center gap-1.5 pb-6">
