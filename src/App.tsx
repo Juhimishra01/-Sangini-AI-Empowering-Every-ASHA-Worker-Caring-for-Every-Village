@@ -1,4 +1,5 @@
 // @ts-nocheck
+import Assistant from "./pages/Assistant";
 import { useAuth } from "./context/AuthContext";
 import Login from "./pages/Login";
 import React, { useState, useRef, useEffect } from 'react';
@@ -1655,7 +1656,7 @@ export default function SanginiAI() {
       )}
       {tab === 'visit' && <RecordVisitScreen />}
       {tab === 'patients' && <PatientsScreen />}
-      {tab === 'assistant' && <AssistantScreen />}
+      {tab === 'assistant' && <Assistant />}
       {tab === 'village' && <VillageScreen />}
       {tab === 'ocr' && <OcrScreen />}
 
