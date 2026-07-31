@@ -1,4 +1,6 @@
 // @ts-nocheck
+import Village from "./pages/Village";
+import OCR from "./pages/OCR";
 import Patients from "./pages/Patients";
 import Assistant from "./pages/Assistant";
 import { useAuth } from "./context/AuthContext";
@@ -1658,8 +1660,8 @@ export default function SanginiAI() {
       {tab === 'visit' && <RecordVisitScreen />}
       {tab === 'patients' && <Patients />}
       {tab === 'assistant' && <Assistant />}
-      {tab === 'village' && <VillageScreen />}
-      {tab === 'ocr' && <OcrScreen />}
+      {tab === 'village' && <Village />}
+      {tab === 'ocr' && <OCR />}
 
       <BottomNav active={tab} setActive={setTab} />
       {showNotif && <NotificationsPanel onClose={() => setShowNotif(false)} />}
