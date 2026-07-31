@@ -1,4 +1,5 @@
 // @ts-nocheck
+import Patients from "./pages/Patients";
 import Assistant from "./pages/Assistant";
 import { useAuth } from "./context/AuthContext";
 import Login from "./pages/Login";
@@ -1655,7 +1656,7 @@ export default function SanginiAI() {
         <HomeScreen go={setTab} openNotif={() => setShowNotif(true)} />
       )}
       {tab === 'visit' && <RecordVisitScreen />}
-      {tab === 'patients' && <PatientsScreen />}
+      {tab === 'patients' && <Patients />}
       {tab === 'assistant' && <Assistant />}
       {tab === 'village' && <VillageScreen />}
       {tab === 'ocr' && <OcrScreen />}
