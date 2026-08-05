@@ -1,8 +1,16 @@
 // @ts-nocheck
+import HomeScreen from "./pages/Home";
+//import Home from "./pages/Home";
+import Village from "./pages/Village";
+import OCR from "./pages/OCR";
+import Patients from "./pages/Patients";
+import Assistant from "./pages/Assistant";
+import { useAuth } from "./context/AuthContext";
+import Login from "./pages/Login";
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Heart,
-  Home,
+  Home as HomeIcon, //remove this for solving an error
   Users,
   Calendar,
   Activity,
@@ -393,7 +401,7 @@ function TopBar({ onNotif, onLogout, unread }) {
 }
 
 const NAV_ITEMS = [
-  { key: 'home', label: 'Home', icon: Home },
+  { key: 'home', label: 'Home', icon: HomeIcon },
   { key: 'visit', label: 'Record', icon: ClipboardList },
   { key: 'patients', label: 'Patients', icon: Users },
   { key: 'assistant', label: 'Sangini', icon: MessageCircle },
@@ -556,138 +564,6 @@ function LoginScreen({ onLogin }) {
       <p className="text-center text-[11px] text-slate-400 pb-6">
         A digital companion built for India's frontline health workers
       </p>
-    </div>
-  );
-}
-
-/* --------------------------------- HOME ----------------------------------- */
-
-function HomeScreen({ go, openNotif }) {
-  const highPriority = todaysVisits.filter((v) => v.priority === 'high').length;
-  return (
-    <div className="px-5 -mt-3 pb-6 space-y-5">
-      <Card className="p-4 bg-gradient-to-br from-white to-teal-50/60">
-        <div className="flex items-center gap-3">
-          <Avatar name={ASHA.name} size={48} />
-          <div>
-            <p className="font-semibold text-slate-800">{ASHA.name}</p>
-            <p className="text-xs text-slate-500">
-              {ASHA.id} · {ASHA.village}
-            </p>
-          </div>
-        </div>
-      </Card>
-
-      <div className="grid grid-cols-2 gap-3">
-        <StatTile
-          icon={Calendar}
-          label="Visits today"
-          value={todaysVisits.length}
-          tint="bg-teal-50 text-teal-600"
-        />
-        <StatTile
-          icon={Users}
-          label="Households assigned"
-          value={villageStats.totalHouseholds}
-          tint="bg-blue-50 text-blue-600"
-        />
-        <StatTile
-          icon={AlertTriangle}
-          label="High-priority follow-ups"
-          value={highPriority + 5}
-          tint="bg-rose-50 text-rose-600"
-        />
-        <StatTile
-          icon={Syringe}
-          label="Children due vaccination"
-          value={7}
-          tint="bg-amber-50 text-amber-600"
-        />
-        <StatTile
-          icon={Baby}
-          label="Pregnant women - checkups"
-          value={villageStats.pregnantWomen}
-          tint="bg-pink-50 text-pink-600"
-        />
-        <StatTile
-          icon={Stethoscope}
-          label="Elderly - chronic care"
-          value={villageStats.chronicPatients}
-          tint="bg-indigo-50 text-indigo-600"
-        />
-      </div>
-
-      <div>
-        <SectionHeader title="Quick actions" />
-        <div className="grid grid-cols-4 gap-3">
-          {[
-            { icon: ClipboardList, label: 'New visit', key: 'visit' },
-            { icon: Search, label: 'Find patient', key: 'patients' },
-            { icon: MessageCircle, label: 'Ask Sangini', key: 'assistant' },
-            { icon: Upload, label: 'Scan doc', key: 'ocr' },
-          ].map((a) => (
-            <button
-              key={a.key}
-              onClick={() => go(a.key)}
-              className="flex flex-col items-center gap-1.5 active:scale-95 transition"
-            >
-              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-center text-teal-600">
-                <a.icon size={20} />
-              </div>
-              <span className="text-[11px] text-slate-600 font-medium text-center leading-tight">
-                {a.label}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <SectionHeader
-          title="Today's home visits"
-          action={
-            <button
-              onClick={openNotif}
-              className="text-xs font-semibold text-teal-600 flex items-center gap-0.5"
-            >
-              Notifications <ChevronRight size={14} />
-            </button>
-          }
-        />
-        <div className="space-y-2.5">
-          {todaysVisits.map((v) => (
-            <Card key={v.id} className="p-3.5 flex items-center gap-3">
-              <Avatar
-                name={v.name}
-                tone={v.priority === 'high' ? 'rose' : 'blue'}
-              />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <p className="font-semibold text-sm text-slate-800 truncate">
-                    {v.name}
-                  </p>
-                  <span className="text-[11px] text-slate-400 shrink-0 ml-2">
-                    {v.time}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-500 truncate">{v.reason}</p>
-                <div className="flex items-center gap-1.5 mt-1.5">
-                  <span
-                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${priorityColor(
-                      v.priority
-                    )}`}
-                  >
-                    {v.priority === 'high' ? 'High priority' : 'Routine'}
-                  </span>
-                  <span className="text-[10px] text-slate-400 flex items-center gap-0.5">
-                    <MapPin size={10} /> {v.address.split(',')[0]}
-                  </span>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
@@ -1610,11 +1486,11 @@ function NotificationsPanel({ onClose }) {
 /* ---------------------------------- ROOT APP --------------------------------- */
 
 export default function SanginiAI() {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [tab, setTab] = useState('home');
+  const { isLoggedIn } = useAuth();
+  const [tab, setTab] = useState("home");
   const [showNotif, setShowNotif] = useState(false);
 
-  if (!loggedIn) return <LoginScreen onLogin={() => setLoggedIn(true)} />;
+  if (!isLoggedIn) return <Login />;
 
   const titles = {
     home: null,
@@ -1629,7 +1505,7 @@ export default function SanginiAI() {
     <div className="min-h-screen bg-slate-50 max-w-md mx-auto relative font-sans">
       <TopBar
         onNotif={() => setShowNotif(true)}
-        onLogout={() => setLoggedIn(false)}
+        onLogout={() => import("./services/authService").then(m => m.logoutUser())}
         unread={notificationsData.filter((n) => n.urgent).length}
       />
 
@@ -1648,14 +1524,12 @@ export default function SanginiAI() {
         </div>
       )}
 
-      {tab === 'home' && (
-        <HomeScreen go={setTab} openNotif={() => setShowNotif(true)} />
-      )}
+      {tab === "home" && <HomeScreen go={setTab} />}
       {tab === 'visit' && <RecordVisitScreen />}
-      {tab === 'patients' && <PatientsScreen />}
-      {tab === 'assistant' && <AssistantScreen />}
-      {tab === 'village' && <VillageScreen />}
-      {tab === 'ocr' && <OcrScreen />}
+      {tab === 'patients' && <Patients />}
+      {tab === 'assistant' && <Assistant />}
+      {tab === 'village' && <Village />}
+      {tab === 'ocr' && <OCR />}
 
       <BottomNav active={tab} setActive={setTab} />
       {showNotif && <NotificationsPanel onClose={() => setShowNotif(false)} />}
